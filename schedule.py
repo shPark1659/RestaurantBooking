@@ -3,6 +3,7 @@ class Customer:
         self.__name = name
         self.__phone_number = phone_number
         self.__email = email
+
     @property
     def name(self):
         return self.__name
@@ -18,15 +19,18 @@ class Customer:
 
 class Schedule:
     def __init__(self, date_time, number_of_people, customer):
-        self.date_time = date_time
-        self.number_of_people = number_of_people
-        self.customer = customer
+        self.__date_time = date_time
+        self.__number_of_people = number_of_people
+        self.__customer = customer
 
-    def get_date_time(self):
-        return self.date_time
+    @property
+    def date_time(self):
+        return self.__date_time
 
-    def get_number_of_people(self):
-        return self.number_of_people
+    @property
+    def number_of_people(self):
+        return self.__number_of_people
 
-    def get_customer(self):
-        return self.customer
+    @property
+    def customer(self):
+        return self.__customer
