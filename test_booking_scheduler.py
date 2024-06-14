@@ -10,6 +10,7 @@ NOT_ON_TIME_TIMESTAMP = datetime.strptime("2021/03/26 09:05", "%Y/%m/%d %H:%M")
 ON_TIME_TIMESTAMP = datetime.strptime("2021/03/26 09:00", "%Y/%m/%d %H:%M")
 DIFFERENT_TIME_TIMESTAMP = datetime.strptime("2021/03/26 10:00", "%Y/%m/%d %H:%M")
 CUSTOMER = Customer("Fake name", "010-1234-5678")
+CUSTOMER_WITH_MAIL = Customer("Fake name", "010-1234-5678", "fake@samsung.com")
 CAPACITY_PER_HOUR = 3
 UNDER_CAPACITY = 1
 OVER_CAPACITY = 4
@@ -19,17 +20,25 @@ class BookingSchedulerTest(unittest.TestCase):
     def setUp(self):
         class FakeSmsSender:
             def __init__(self):
-                self.is_called = False
+                self.__cnt_called = 0
 
             def send(self, schedule):
-                self.is_called = True
+                self.__cnt_called += 1
+
+            @property
+            def cnt_called(self):
+                return self.__cnt_called
 
         class FakeMailSender:
             def __init__(self):
-                self.is_called = False
+                self.__cnt_called = 0
 
-            def send(self, schedule):
-                self.is_called = True
+            def send_mail(self, schedule):
+                self.__cnt_called += 1
+
+            @property
+            def cnt_called(self):
+                return self.__cnt_called
 
         self.fake_sms_sender = FakeSmsSender()
         self.fake_mail_sender = FakeMailSender()
@@ -86,21 +95,29 @@ class BookingSchedulerTest(unittest.TestCase):
         self.booking_scheduler.add_schedule(schedule)
 
         # assert
-        self.assertTrue(self.fake_sms_sender.is_called)
+        self.assertEqual(1, self.fake_sms_sender.cnt_called)
 
     def test_이메일이_없는_경우에는_이메일_미발송(self):
         # arrange
         schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER)
 
         # act
+        self.booking_scheduler.set_mail_sender(self.fake_mail_sender)
         self.booking_scheduler.add_schedule(schedule)
 
         # assert
-        self.assertFalse(self.fake_mail_sender.is_called)
+        self.assertEqual(0, self.fake_mail_sender.cnt_called)
 
-    @skip
     def test_이메일이_있는_경우에는_이메일_발송(self):
-        pass
+        # arrange
+        schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER_WITH_MAIL)
+
+        # act
+        self.booking_scheduler.set_mail_sender(self.fake_mail_sender)
+        self.booking_scheduler.add_schedule(schedule)
+
+        # assert
+        self.assertEqual(1, self.fake_mail_sender.cnt_called)
 
     @skip
     def test_현재날짜가_일요일인_경우_예약불가_예외처리(self):
