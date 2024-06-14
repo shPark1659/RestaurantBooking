@@ -13,13 +13,13 @@ class BookingScheduler:
         self.mail_sender = MailSender()
 
     def add_schedule(self, schedule: Schedule):
-        if schedule.get_date_time().minute != 0:
+        if schedule.date_time.minute != 0:
             raise ValueError("Booking should be on the hour.")
 
-        number_of_people = schedule.get_number_of_people()
+        number_of_people = schedule.number_of_people
         for booked_schedule in self.schedules:
-            if booked_schedule.get_date_time() == schedule.get_date_time():
-                number_of_people += booked_schedule.get_number_of_people()
+            if booked_schedule.date_time == schedule.date_time:
+                number_of_people += booked_schedule.number_of_people
         if number_of_people > self.capacity_per_hour:
             raise ValueError("Number of people is over restaurant capacity per hour")
 
@@ -30,7 +30,7 @@ class BookingScheduler:
 
         self.schedules.append(schedule)
         self.sms_sender.send(schedule)
-        if schedule.get_customer().email:
+        if schedule.customer.email:
             self.mail_sender.send_mail(schedule)
 
     def has_schedule(self, schedule):
