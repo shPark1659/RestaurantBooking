@@ -17,6 +17,14 @@ OVER_CAPACITY = 4
 
 class BookingSchedulerTest(unittest.TestCase):
     def setUp(self):
+        class FakeSmsSender:
+            def __init__(self):
+                self.is_called = False
+
+            def send(self, schedule):
+                self.is_called = True
+
+        self.fake_sms_sender = FakeSmsSender()
         self.booking_scheduler = BookingScheduler(CAPACITY_PER_HOUR)
 
     def test_예약은_정시에만_가능하다_정시가_아닌경우_예약불가(self):
@@ -63,23 +71,15 @@ class BookingSchedulerTest(unittest.TestCase):
         self.assertTrue(self.booking_scheduler.has_schedule(schedule2))
 
     def test_예약완료시_SMS는_무조건_발송(self):
-        class FakeSmsSender:
-            def __init__(self):
-                self.is_called = False
-
-            def send(self, schedule):
-                self.is_called = True
-
         # arrange
         schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER)
-        sms_sender = FakeSmsSender()
 
         # act
-        self.booking_scheduler.set_sms_sender(sms_sender)
+        self.booking_scheduler.set_sms_sender(self.fake_sms_sender)
         self.booking_scheduler.add_schedule(schedule)
 
         # assert
-        self.assertTrue(sms_sender.is_called)
+        self.assertTrue(self.fake_sms_sender.is_called)
     @skip
     def test_이메일이_없는_경우에는_이메일_미발송(self):
         pass
