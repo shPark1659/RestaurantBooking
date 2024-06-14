@@ -1,11 +1,19 @@
 class Customer:
     def __init__(self, name, phone_number, email=None):
-        self.name = name
-        self.phone_number = phone_number
-        self.email = email
+        self.__name = name
+        self.__phone_number = phone_number
+        self.__email = email
+    @property
+    def name(self):
+        return self.__name
 
-    def get_email(self):
-        return self.email
+    @property
+    def phone_number(self):
+        return self.__phone_number
+
+    @property
+    def email(self):
+        return self.__email
 
 
 class Schedule:

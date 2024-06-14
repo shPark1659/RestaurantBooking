@@ -30,7 +30,7 @@ class BookingScheduler:
 
         self.schedules.append(schedule)
         self.sms_sender.send(schedule)
-        if schedule.get_customer().get_email():
+        if schedule.get_customer().email:
             self.mail_sender.send_mail(schedule)
 
     def has_schedule(self, schedule):

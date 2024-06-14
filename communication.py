@@ -1,7 +1,7 @@
 class MailSender:
     def send_mail(self, schedule):
-        if schedule.get_customer().get_email():
-            print(f"Sending email to {schedule.get_customer().get_email()} for schedule at {schedule.get_date_time()}")
+        if schedule.get_customer().email:
+            print(f"Sending email to {schedule.get_customer().email} for schedule at {schedule.get_date_time()}")
 
 
 class SmsSender:
