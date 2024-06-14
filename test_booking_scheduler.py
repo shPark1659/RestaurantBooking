@@ -3,6 +3,7 @@ from datetime import datetime
 from unittest import skip
 
 from booking_scheduler import BookingScheduler
+from communication import SmsSender
 from schedule import Customer, Schedule
 
 NOT_ON_TIME_TIMESTAMP = datetime.strptime("2021/03/26 09:05", "%Y/%m/%d %H:%M")
@@ -38,11 +39,14 @@ class BookingSchedulerTest(unittest.TestCase):
 
     def test_시간대별_인원제한이_있다_같은_시간대에_Capacity_초과할_경우_예외발생(self):
         # arrange
-        schedule = Schedule(ON_TIME_TIMESTAMP, OVER_CAPACITY, CUSTOMER)
+        schedule1 = Schedule(ON_TIME_TIMESTAMP, CAPACITY_PER_HOUR, CUSTOMER)
+        schedule2 = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER)
+
+        self.booking_scheduler.add_schedule(schedule1)
 
         # act and assert
         with self.assertRaises(ValueError):
-            self.booking_scheduler.add_schedule(schedule)
+            self.booking_scheduler.add_schedule(schedule2)
 
     @skip
     def test_시간대별_인원제한이_있다_같은_시간대가_다르면_Capacity_차있어도_스케쥴_추가_성공(self):
@@ -58,10 +62,24 @@ class BookingSchedulerTest(unittest.TestCase):
         self.assertTrue(self.booking_scheduler.has_schedule(schedule1))
         self.assertTrue(self.booking_scheduler.has_schedule(schedule2))
 
-    @skip
     def test_예약완료시_SMS는_무조건_발송(self):
-        pass
+        class FakeSmsSender:
+            def __init__(self):
+                self.is_called = False
 
+            def send(self, schedule):
+                self.is_called = True
+
+        # arrange
+        schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER)
+        sms_sender = FakeSmsSender()
+
+        # act
+        self.booking_scheduler.set_sms_sender(sms_sender)
+        self.booking_scheduler.add_schedule(schedule)
+
+        # assert
+        self.assertTrue(sms_sender.is_called)
     @skip
     def test_이메일이_없는_경우에는_이메일_미발송(self):
         pass
