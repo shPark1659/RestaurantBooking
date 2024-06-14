@@ -6,8 +6,8 @@ from communication import MailSender
 
 
 class BookingScheduler:
-    def __init__(self, capacity_per_hour):
-        self.capacity_per_hour = capacity_per_hour
+    def __init__(self, capacity):
+        self.capacity = capacity
         self.schedules = []
         self.sms_sender = SmsSender()
         self.mail_sender = MailSender()
@@ -20,7 +20,7 @@ class BookingScheduler:
         for booked_schedule in self.schedules:
             if booked_schedule.date_time == schedule.date_time:
                 number_of_people += booked_schedule.number_of_people
-        if number_of_people > self.capacity_per_hour:
+        if number_of_people > self.capacity:
             raise ValueError("Number of people is over restaurant capacity per hour")
 
         # 일요일에는 시스템을 오픈하지 않는다.
