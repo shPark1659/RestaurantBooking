@@ -32,9 +32,13 @@ class BookingSchedulerTest(unittest.TestCase):
         # assert
         self.assertTrue(self.booking_scheduler.has_schedule(schedule))
 
-    @skip
     def test_시간대별_인원제한이_있다_같은_시간대에_Capacity_초과할_경우_예외발생(self):
-        pass
+        # arrange
+        schedule = Schedule(ON_TIME_TIMESTAMP, 4, CUSTOMER)
+
+        # act and assert
+        with self.assertRaises(ValueError):
+            self.booking_scheduler.add_schedule(schedule)
 
     @skip
     def test_시간대별_인원제한이_있다_같은_시간대가_다르면_Capacity_차있어도_스케쥴_추가_성공(self):
