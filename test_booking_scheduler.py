@@ -2,8 +2,8 @@ import unittest
 from datetime import datetime
 from unittest import skip
 
-from booking_scheduler import BookingScheduler
-from communication import SmsSender
+from booking_scheduler import BookingScheduler, SundayBookingScheduler, MondayBookingScheduler
+from communication import SmsSender, MailSender
 from schedule import Customer, Schedule
 
 NOT_ON_TIME_TIMESTAMP = datetime.strptime("2021/03/26 09:05", "%Y/%m/%d %H:%M")
@@ -18,7 +18,7 @@ OVER_CAPACITY = 4
 
 class BookingSchedulerTest(unittest.TestCase):
     def setUp(self):
-        class FakeSmsSender:
+        class FakeSmsSender(SmsSender):
             def __init__(self):
                 self.__cnt_called = 0
 
@@ -29,7 +29,7 @@ class BookingSchedulerTest(unittest.TestCase):
             def cnt_called(self):
                 return self.__cnt_called
 
-        class FakeMailSender:
+        class FakeMailSender(MailSender):
             def __init__(self):
                 self.__cnt_called = 0
 
@@ -43,6 +43,8 @@ class BookingSchedulerTest(unittest.TestCase):
         self.fake_sms_sender = FakeSmsSender()
         self.fake_mail_sender = FakeMailSender()
         self.booking_scheduler = BookingScheduler(CAPACITY_PER_HOUR)
+        self.sunday_booking_scheduler = SundayBookingScheduler(CAPACITY_PER_HOUR)
+        self.monday_booking_scheduler = MondayBookingScheduler(CAPACITY_PER_HOUR)
 
     def test_예약은_정시에만_가능하다_정시가_아닌경우_예약불가(self):
         # arrange
@@ -54,7 +56,7 @@ class BookingSchedulerTest(unittest.TestCase):
 
     def test_예약은_정시에만_가능하다_정시인_경우_예약가능(self):
         # arrange
-        schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER)
+        schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER_WITH_MAIL)
 
         # act
         self.booking_scheduler.add_schedule(schedule)
@@ -119,13 +121,23 @@ class BookingSchedulerTest(unittest.TestCase):
         # assert
         self.assertEqual(1, self.fake_mail_sender.cnt_called)
 
-    @skip
     def test_현재날짜가_일요일인_경우_예약불가_예외처리(self):
-        pass
+        # arrange
+        schedule = Schedule(ON_TIME_TIMESTAMP, CAPACITY_PER_HOUR, CUSTOMER)
 
-    @skip
+        # act and assert
+        with self.assertRaises(ValueError):
+            self.sunday_booking_scheduler.add_schedule(schedule)
+
     def test_현재날짜가_일요일이_아닌경우_예약가능(self):
-        pass
+        # arrange
+        schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER_WITH_MAIL)
+
+        # act
+        self.monday_booking_scheduler.add_schedule(schedule)
+
+        # assert
+        self.assertTrue(self.monday_booking_scheduler.has_schedule(schedule))
 
 
 if __name__ == '__main__':
