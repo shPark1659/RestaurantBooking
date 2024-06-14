@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from unittest import skip
 
-from booking_scheduler import BookingScheduler, SundayBookingScheduler, MondayBookingScheduler
+from booking_scheduler import TestableBookingScheduler
 from communication import SmsSender, MailSender
 from schedule import Customer, Schedule
 
@@ -42,9 +42,8 @@ class BookingSchedulerTest(unittest.TestCase):
 
         self.fake_sms_sender = FakeSmsSender()
         self.fake_mail_sender = FakeMailSender()
-        self.booking_scheduler = BookingScheduler(CAPACITY_PER_HOUR)
-        self.sunday_booking_scheduler = SundayBookingScheduler(CAPACITY_PER_HOUR)
-        self.monday_booking_scheduler = MondayBookingScheduler(CAPACITY_PER_HOUR)
+        self.booking_scheduler = TestableBookingScheduler(CAPACITY_PER_HOUR, "2021/03/29 09:00")
+        self.sunday_booking_scheduler = TestableBookingScheduler(CAPACITY_PER_HOUR, "2021/03/28 09:00")
 
     def test_예약은_정시에만_가능하다_정시가_아닌경우_예약불가(self):
         # arrange
@@ -134,10 +133,10 @@ class BookingSchedulerTest(unittest.TestCase):
         schedule = Schedule(ON_TIME_TIMESTAMP, UNDER_CAPACITY, CUSTOMER_WITH_MAIL)
 
         # act
-        self.monday_booking_scheduler.add_schedule(schedule)
+        self.booking_scheduler.add_schedule(schedule)
 
         # assert
-        self.assertTrue(self.monday_booking_scheduler.has_schedule(schedule))
+        self.assertTrue(self.booking_scheduler.has_schedule(schedule))
 
 
 if __name__ == '__main__':
