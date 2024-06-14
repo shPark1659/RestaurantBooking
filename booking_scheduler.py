@@ -16,11 +16,11 @@ class BookingScheduler:
         if schedule.get_date_time().minute != 0:
             raise ValueError("Booking should be on the hour.")
 
-        numberOfPeople = schedule.get_number_of_people()
+        number_of_people = schedule.get_number_of_people()
         for booked_schedule in self.schedules:
             if booked_schedule.get_date_time() == schedule.get_date_time():
-                numberOfPeople += booked_schedule.get_number_of_people()
-        if numberOfPeople > self.capacity_per_hour:
+                number_of_people += booked_schedule.get_number_of_people()
+        if number_of_people > self.capacity_per_hour:
             raise ValueError("Number of people is over restaurant capacity per hour")
 
         # 일요일에는 시스템을 오픈하지 않는다.
